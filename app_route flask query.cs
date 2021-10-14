@@ -76,54 +76,54 @@ foreach (CxList ar in appRoute)
 	
 	if (input_param.Count > 0)
 	{
-		if (Urls.GetName().Contains("<int:") == true)
+		string str_url = Urls.GetName();
+		char[] delimiterChars = {'/'};
+		string[] words = str_url.Split(delimiterChars);
+
+		foreach (var word in words)
 		{
-			path = path.ConcatenatePath(createCommentNode("param type"), false);
-			path = path.ConcatenatePath(createCommentNode("int"), false);
+			/* Check if we reached the <type:parameter name> pair in the URL */
+			if (word.StartsWith("<"))
+			{
+				/* Split between the type and the param name */
+				string[] par_type_and_name = word.Split(':');
+				foreach (var par in par_type_and_name)
+				{
+					/* Check if this is the type */
+					if (par.StartsWith("<"))
+					{
+						if (word.Contains(":") == true)
+						{
+							/* Remove unnessecary chars */
+							var trimmed_par = par.Trim('<');
+							path = path.ConcatenatePath(createCommentNode("param type"), false);
+							path = path.ConcatenatePath(createCommentNode(trimmed_par), false);
+						}
+						else
+						{
+							path = path.ConcatenatePath(createCommentNode("param type"), false);
+							path = path.ConcatenatePath(createCommentNode("str"), false);
+						}
+								
+					}
+					/* Check if this is the name */
+					if (par.EndsWith(">"))
+					{
+						/* Remove unnessecary chars */
+						var trimmed_par = par.Trim('<','>');
+						path = path.ConcatenatePath(createCommentNode("param name"), false);
+						path = path.ConcatenatePath(createCommentNode(trimmed_par), false);
+					}
+				}
+			}
 		}
-		else 
-			if (Urls.GetName().Contains("<float:") == true)
-		{
-			path = path.ConcatenatePath(createCommentNode("param type"), false);
-			path = path.ConcatenatePath(createCommentNode("float"), false);
-		}
-			
-		else 
-			if (Urls.GetName().Contains("<path:") == true)
-		{
-			path = path.ConcatenatePath(createCommentNode("param type"), false);
-			path = path.ConcatenatePath(createCommentNode("path"), false);
-		}
-		else 
-			if (Urls.GetName().Contains("<uuid:") == true)
-		{
-			path = path.ConcatenatePath(createCommentNode("param type"), false);
-			path = path.ConcatenatePath(createCommentNode("int"), false);
-		}	
-		else
-		{
-			path = path.ConcatenatePath(createCommentNode("param type"), false);
-			path = path.ConcatenatePath(createCommentNode("str"), false);
-		}
-			
-		
-		path = path.ConcatenatePath(createCommentNode("input parameter name"), false);
-		foreach (CxList par in input_param)
-			path = path.ConcatenatePath(par, false);
-			
 	}
-	else{
+		
+	else
+	{
 		path = path.ConcatenatePath(createCommentNode("input parameters"), false);
 		path = path.ConcatenatePath(createCommentNode("no parameters"), false);
 	}
-	/* trying to fetch the rendered page that the fuction returns (in case there is one) */
-/*	var viewCallLine = Find_ViewCalls().GetByAncs(ar.GetAncOfType<MethodDecl>()).CxSelectElementValues<ViewCall,int>(x => x.LinePragma.Line && x.LinePragma.Filename == ar.LinePragma.Filename).FirstOrDefault();
-
-	if (viewCallLine != null)
-	{
-		result.Add(render_source.FindByPosition(viewCallLine));
-	}
-*/
 	result.Add(path);
 }
 
