@@ -11,8 +11,8 @@ Func<string, CxList> createCommentNode = (text) => {
 
 /* Find all method invoke expr */
 CxList routes = Find_ArrayInitializer().CxSelectElements<ArrayInitializer>(x => x.InitialValues).FindByType<MethodInvokeExpr>();
-
-CxList functions = All.FindByType(typeof(MemberAccess));
+/* Get the fuction of the associatioed view */
+CxList methods = Find_MethodDecls().FindByShortName("user_login").FindByFileName("*\\loginas\\views.py");
 
 
 foreach (CxList route in routes)
@@ -33,6 +33,9 @@ foreach (CxList route in routes)
 		the endpoint in the first run, and then the value of "name" later */
 		CxList include = allUrls_andRoutes.FindByName("include");
 		CxList member = allUrls_andRoutes.FindByType<MemberAccess>();
+		
+		
+		
 		CxList UnknownRef = allUrls_andRoutes.FindByType(typeof(UnknownReference));
 		bool getendpoint = true;
 		
@@ -103,6 +106,7 @@ foreach (CxList route in routes)
 			foreach (CxList mem in member)
 			{
 				path = path.ConcatenatePath(mem, false);
+				
 			}
 		}
 		else 
