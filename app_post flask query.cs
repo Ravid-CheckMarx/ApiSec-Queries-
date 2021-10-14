@@ -13,6 +13,7 @@ CxList methods = Find_Methods();
 CxList flaskApp = Find_Methods_By_Import("flask", new string[] {"Flask"}).GetAssignee();
 string flaskAppVar = flaskApp.GetName();
 
+/* Triggering every possible option */
 CxList appRoute = customAttributes.FindByCustomAttribute(flaskAppVar + ".post");
 appRoute.Add(customAttributes.FindByCustomAttribute(flaskAppVar + ".get"));
 appRoute.Add(customAttributes.FindByCustomAttribute(flaskAppVar + ".put"));
@@ -37,14 +38,6 @@ foreach (CxList ar in appRoute) {
 	/* HTTP type of decorations */
 	
 	CxList getHttpType = ar.CxSelectElements<CustomAttribute>(x => x.Parameters).FindByType<AssignExpr>();
-	return getHttpType;
-	
-	
-	
-	/*foreach (CxList type in getHttpType){
-			
-	path = path.ConcatenatePath(type, false);
-	}*/
 	
 	path = path.ConcatenatePath(createCommentNode("HTTP types"), false);
 	path = path.ConcatenatePath(ar, false);
@@ -52,19 +45,63 @@ foreach (CxList ar in appRoute) {
 	/* input parameters of decorations */
 	CxList input_param = All.GetParameters(ar.GetAncOfType<MethodDecl>());
 	
-	if (input_param.Count > 0){
+	if (input_param.Count > 0)
+	{
 		
-		cxLog.WriteDebugMessage(input_param);
-		path = path.ConcatenatePath(createCommentNode("input parameter name"), false);
-		foreach (CxList par in input_param)
-			path = path.ConcatenatePath(par, false);
-			
+		string str_url = Urls.GetName();
+		char[] delimiterChars = {'/'};
+		string[] words = str_url.Split(delimiterChars);
+
+		foreach (var word in words)
+		{
+			/* Check if we reached the <type:parameter name> pair in the URL */
+			if (word.StartsWith("<"))
+			{
+				/* Split between the type and the param name */
+				string[] par_type_and_name = word.Split(':');
+				foreach (var par in par_type_and_name)
+				{
+					/* Check if this is the type */
+					if (par.StartsWith("<"))
+					{
+						if (word.Contains(":") == true)
+						{
+							/* Remove unnessecary chars */
+							var trimmed_par = par.Trim('<');
+							path = path.ConcatenatePath(createCommentNode("param type"), false);
+							path = path.ConcatenatePath(createCommentNode(trimmed_par), false);
+						}	
+					}
+					/* Check if this is the name */
+					if (par.EndsWith(">"))
+					{
+						/* Remove unnessecary chars */
+						var trimmed_par = par.Trim('<', '>');
+						path = path.ConcatenatePath(createCommentNode("param name"), false);
+						path = path.ConcatenatePath(createCommentNode(trimmed_par), false);
+					}
+				}
+			}
+		}
+		/* In case there are no paramters in the URL, but there are in the method */
+		if (Urls.GetName().Contains(":") == false)
+		{
+			/* Running on each one of the parameters */
+			foreach (CxList parameter in input_param)
+			{
+				path = path.ConcatenatePath(createCommentNode("param type"), false);
+				path = path.ConcatenatePath(createCommentNode("str"), false);
+				path = path.ConcatenatePath(createCommentNode("input parameter name"), false);
+				path = path.ConcatenatePath(parameter, false);
+			}
+		}
 	}
-	else{
+		
+	else
+	{
 		path = path.ConcatenatePath(createCommentNode("input parameters"), false);
 		path = path.ConcatenatePath(createCommentNode("no parameters"), false);
 	}
 	
 	result.Add(path);
 }
-
