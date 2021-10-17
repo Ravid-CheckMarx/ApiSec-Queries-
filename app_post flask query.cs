@@ -24,6 +24,7 @@ foreach (CxList ar in appRoute) {
 	
 	CxList path = ar;
 	CxList allUrls_andRoutes = All.GetByAncs(ar);
+	CxList fun = All.GetMethod(ar);
 	
 	/* urls of decorations */
 	CxList Urls = ar.CxSelectElements<CustomAttribute>(x => x.Parameters).FindByType<StringLiteral>();
@@ -41,6 +42,10 @@ foreach (CxList ar in appRoute) {
 	
 	path = path.ConcatenatePath(createCommentNode("HTTP types"), false);
 	path = path.ConcatenatePath(ar, false);
+	
+	path = path.ConcatenatePath(createCommentNode("method"), false);
+	/* Return the method attached to each route */
+	path = path.ConcatenatePath(fun, false);
 	
 	/* input parameters of decorations */
 	CxList input_param = All.GetParameters(ar.GetAncOfType<MethodDecl>());
