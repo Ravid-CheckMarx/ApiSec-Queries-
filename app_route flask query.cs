@@ -38,12 +38,6 @@ foreach (CxList ar in appRoute)
 	path = path.ConcatenatePath(createCommentNode("Url"), false);
 	path = path.ConcatenatePath(Urls, false);
 	
-	/*string abc = Urls.GetName();
-	foreach (CxList b in abc)
-	{
-		string[] bb = b.Split('<');
-		cxLog.WriteDebugMessage(bb);
-	}*/	
 
 	/* HTTP type of decorations */
 	
